@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earrings & Jhumkas | Fancy World</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .earring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 2rem;
+            padding: 2rem 5%;
+        }
+
+        .earring-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+            text-align: center;
+            padding-bottom: 1rem;
+        }
+
+        .earring-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-gold);
+        }
+
+        .earring-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1rem;
+        }
+
+        .earring-title {
+            font-size: 1rem;
+            color: var(--primary-gold-light);
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+
+        .earring-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 0 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="home.html#categories" style="color: var(--primary-gold);">Collections</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+        <div class="icon-links">
+            <i class="fas fa-search icon-btn"></i>
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--primary-gold); color: black; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">{{
+                    cart_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </nav>
+    <script src="/static/js/main.js"></script>
+
+    <header class="hero"
+        style="height: 35vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../static/images/fancy_choker.png'); background-position: center;">
+        <div class="hero-content">
+            <h1>Earrings & Jhumkas</h1>
+            <p>From Traditional Jimikkis to Modern Thread Work</p>
+        </div>
+    </header>
+
+    <section>
+        <div style="padding: 2rem 5%; text-align: center;">
+            <h2 class="section-title">Earrings Collection</h2>
+        </div>
+
+        <div class="products-grid" style="padding: 0 5% 2rem;">
+            {% for p in products %}
+            <div class="product-card-mobile" onclick="window.location.href='/customize/{{ p._id }}'"
+                style="cursor: pointer;">
+                <div class="product-card-mobile__image-wrapper">
+                    <img src="{{ p.image_url or '/static/images/default.png' }}" alt="{{ p.name }}"
+                        class="product-card-mobile__image">
+                </div>
+                <div class="product-card-mobile__info">
+                    <h3 class="product-card-mobile__name">{{ p.name }}</h3>
+                    <p class="product-card-mobile__category">{{ p.category }}</p>
+                    <div class="product-card-mobile__footer">
+                        <span class="product-card-mobile__price">₹{{ "%.2f"|format(p.price) }}</span>
+                        <button class="product-card-mobile__add-btn"
+                            style="background: var(--primary-gold); color: black;">Customize</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not products %}
+            <div style="text-align: center; grid-column: 1/-1; padding: 3rem; color: #888;">
+                <p>New designs coming soon!</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Fancy World. All Rights Reserved.</p>
+    </footer>
+
+</body>
+
+</html>

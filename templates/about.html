@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Fancy World</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/category/all">Collections</a></li>
+            <li><a href="/about" class="active">About</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/profile" class="icon-btn"><i class="fas fa-user-circle"></i></a>
+            <a href="/search" class="icon-btn"><i class="fas fa-search"></i></a>
+            <a href="/cart" class="icon-btn" style="position: relative;">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--primary-gold); color: black; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">
+                    {{ cart_count }}
+                </span>
+                {% endif %}
+            </a>
+            <a href="/logout" class="icon-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <!-- Hero Content for About -->
+    <div
+        style="background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('/static/images/luxury_jewelry_hero.png'); background-size: cover; background-position: center; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 4rem 5%;">
+        <div class="about-content"
+            style="max-width: 800px; text-align: center; background: rgba(20,20,20,0.6); padding: 3rem; border-radius: 20px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
+            <h1
+                style="font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--primary-gold); margin-bottom: 2rem;">
+                Our Story</h1>
+            <p style="font-size: 1.2rem; line-height: 1.8; color: #ddd; margin-bottom: 2rem;">
+                Fancy World is your one-stop destination for all things beautiful and elegant.
+                We specialize in curated **Fancy Accessories** and **Premium Imitation Jewellery** that bring timeless
+                elegance to every occasion.
+            </p>
+
+            <p style="font-size: 1.1rem; line-height: 1.8; color: #bbb; margin-bottom: 3rem;">
+                From traditional **Glass Bangles** to contemporary **Stone Chokers**, we bridge the gap between
+                tradition and modernity.
+                Every piece is handpicked to ensure the highest quality and craftsmanship for our discerning customers.
+            </p>
+
+            <div style="display: flex; justify-content: space-around; gap: 2rem; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                    <i class="fas fa-gem"
+                        style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                    <h3 style="font-size: 1rem;">Premium Quality</h3>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-palette"
+                        style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                    <h3 style="font-size: 1rem;">Artisan Designs</h3>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-certificate"
+                        style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                    <h3 style="font-size: 1rem;">Trusted Service</h3>
+                </div>
+            </div>
+
+            <a href="/category/all" class="cta-btn" style="display: inline-block; margin-top: 3rem;">Shop the
+                Collection</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        style="padding: 4rem 5%; background: #000; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="logo" style="margin-bottom: 1.5rem;">Fancy World</div>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">&copy; 2026 Fancy World Jewelry. All rights reserved.
+        </p>
+    </footer>
+
+    <style>
+        .active {
+            color: var(--primary-gold) !important;
+        }
+    </style>
+</body>
+
+</html>

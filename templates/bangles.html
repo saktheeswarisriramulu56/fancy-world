@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangles Collection | Fancy World</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .category-section {
+            padding: 2rem 5%;
+            background: var(--card-bg);
+            margin-bottom: 1rem;
+        }
+
+        .category-header {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+        }
+
+        .category-header::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 20px;
+            background: var(--primary-gold);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .circle-grid {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .circle-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .circle-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .circle-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-gold);
+            margin-bottom: 0.8rem;
+        }
+
+        .circle-label {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #fff;
+            font-weight: 500;
+            height: 40px;
+        }
+
+        .price-tag {
+            color: var(--primary-gold);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .mini-add-btn {
+            width: 100%;
+            padding: 6px;
+            background: var(--primary-gold);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .rect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/home#categories" style="color: var(--primary-gold);">Collections</a></li>
+            <li><a href="/about.html">About</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero"
+        style="height: 30vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/static/images/glass_bangles.png');">
+        <div class="hero-content">
+            <h1>Bangles & Chuda</h1>
+            <p>From Traditional Glass to Heavy Bridal Kada</p>
+        </div>
+    </header>
+
+    <!-- Shop by Material -->
+    <section class="category-section">
+        <div class="category-header">Shop by Material</div>
+        <div class="circle-grid">
+            <div class="circle-item">
+                <img src="/static/images/glass_bangles.png" class="circle-img" alt="Glass">
+                <span class="circle-label">Glass Valayal Set</span>
+                <span class="price-tag">₹120</span>
+                <button class="mini-add-btn add-btn">Add to Bag</button>
+            </div>
+            <div class="circle-item">
+                <img src="/static/images/glass_bangles.png" class="circle-img" style="filter: hue-rotate(90deg);"
+                    alt="Lac">
+                <span class="circle-label">Jaipur Lac Bangles</span>
+                <span class="price-tag">₹350</span>
+                <button class="mini-add-btn add-btn">Add to Bag</button>
+            </div>
+            <div class="circle-item">
+                <img src="/static/images/fancy_anklets.png" class="circle-img" alt="Silver">
+                <span class="circle-label">German Silver Kada</span>
+                <span class="price-tag">₹450</span>
+                <button class="mini-add-btn add-btn">Add to Bag</button>
+            </div>
+            <div class="circle-item">
+                <img src="/static/images/hair_accessories.png" class="circle-img" alt="Thread">
+                <span class="circle-label">Silk Thread Set</span>
+                <span class="price-tag">₹200</span>
+                <button class="mini-add-btn add-btn">Add to Bag</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Regional Specials -->
+    <section class="category-section">
+        <div class="category-header">Regional Specials</div>
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-img-wrapper">
+                    <img src="/static/images/glass_bangles.png" class="product-img" style="filter: sepia(0.5);"
+                        alt="Rajasthan">
+                </div>
+                <div class="product-info">
+                    <h4 class="product-title">Rajasthani Chuda</h4>
+                    <div class="product-price">₹1200.00</div>
+                    <button class="add-btn cta-btn">Add to Bag</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img-wrapper">
+                    <img src="/static/images/glass_bangles.png" class="product-img" style="filter: hue-rotate(320deg);"
+                        alt="Punjabi">
+                </div>
+                <div class="product-info">
+                    <h4 class="product-title">Punjabi Kalire</h4>
+                    <div class="product-price">₹850.00</div>
+                    <button class="add-btn cta-btn">Add to Bag</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img-wrapper">
+                    <img src="/static/images/fancy_choker.png" class="product-img" alt="South Indian">
+                </div>
+                <div class="product-info">
+                    <h4 class="product-title">South Indian Vanki</h4>
+                    <div class="product-price">₹450.00</div>
+                    <button class="add-btn cta-btn">Add to Bag</button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- All Bangle Products from DB -->
+    <section class="category-section" style="background: transparent;">
+        <div class="category-header">Shop All Products</div>
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card" onclick="window.location.href='/customize/{{ product._id }}'">
+                <div class="product-img-wrapper">
+                    <img src="{{ product.image_url or '/static/images/glass_bangles.png' }}" class="product-img"
+                        alt="{{ product.name }}">
+                </div>
+                <div class="product-info">
+                    <h4 class="product-title">{{ product.name }}</h4>
+                    <div class="product-price">₹{{ product.price }}</div>
+                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 10px;">Stock: {{ product.stock_quantity }}</p>
+                    <button class="cta-btn">Customize</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </section>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

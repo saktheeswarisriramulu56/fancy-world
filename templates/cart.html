@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart | Fancy World</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/home#categories">Collections</a></li>
+            <li><a href="/customization">Custom Design</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--primary-gold); color: black; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">{{
+                    cart_count }}</span>
+                {% endif %}
+            </a>
+            <a href="/logout" class="icon-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <div style="max-width: 900px; margin: 4rem auto; padding: 2rem;">
+        <h1 class="brand-title" style="margin-bottom: 2rem;">Your Shopping Bag</h1>
+
+        {% if cart_items %}
+        <div class="cart-list">
+            {% for item in cart_items %}
+            <div
+                style="background: var(--card-bg); padding: 1rem; margin-bottom: 1rem; border-radius: 8px; display: flex; align-items: center; gap: 1rem;">
+                <img src="{{ item.get('image_url', '/static/images/default.png') }}"
+                    style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                <div style="flex-grow: 1;">
+                    <h3 style="color: var(--primary-gold);">{{ item.name }}</h3>
+                    {% if item.customizations %}
+                    <div style="font-size: 0.8rem; color: #888; margin-top: 4px;">
+                        {% for key, val in item.customizations.items() %}
+                        <span style="margin-right: 10px;"><strong style="color: #aaa;">{{ key|capitalize }}:</strong> {{
+                            val }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <p style="color: #ccc; margin-top: 8px;">Qty: {{ item.get('quantity', 1) }}</p>
+                </div>
+                <div style="font-weight: bold; font-size: 1.2rem;">₹{{ "%.2f"|format(item.price * item.get('quantity',
+                    1)) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Shipping Address Form -->
+        <div style="background: var(--card-bg); padding: 1.5rem; margin-top: 2rem; border-radius: 8px;">
+            <h2 style="margin-bottom: 1rem; font-family: 'Playfair Display', serif;">Shipping Address</h2>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+                <div class="input-group">
+                    <label for="house_number">House/Flat No.</label>
+                    <input type="text" id="house_number" placeholder="42-B" required>
+                </div>
+                <div class="input-group">
+                    <label for="address">Street Address</label>
+                    <input type="text" id="address" placeholder="123 Main Street" required>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div class="input-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" placeholder="City" required>
+                </div>
+                <div class="input-group">
+                    <label for="state">State</label>
+                    <input type="text" id="state" placeholder="State" required>
+                </div>
+                <div class="input-group">
+                    <label for="pincode">Pincode</label>
+                    <input type="text" id="pincode" placeholder="600001" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div style="background: var(--card-bg); padding: 1.5rem; margin-top: 1.5rem; border-radius: 8px;">
+            <h2 style="margin-bottom: 1rem; font-family: 'Playfair Display', serif;">Select Payment Method</h2>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                <label
+                    style="display: flex; flex-direction: column; align-items: center; padding: 2rem; border: 2px solid var(--primary-gold); border-radius: 8px; cursor: pointer; background: rgba(212, 175, 55, 0.05);">
+                    <input type="radio" name="payment_method" value="COD" checked style="display: none;">
+                    <i class="fas fa-money-bill-wave"
+                        style="font-size: 3rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                    <span style="font-size: 1.3rem; font-weight: bold; color: white; letter-spacing: 1px;">Cash on Delivery (COD)</span>
+                    <span style="font-size: 0.9rem; color: #aaa; margin-top: 0.8rem;">Pay when you receive your order</span>
+                </label>
+            </div>
+        </div>
+
+        <div
+            style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: 'Playfair Display', serif;">Total Amount</h2>
+            <h2 style="color: var(--primary-gold); font-size: 2rem;">₹{{ "%.2f"|format(total) }}</h2>
+        </div>
+
+        <button id="checkout-btn" class="cta-btn"
+            style="width: 100%; margin-top: 2rem; font-size: 1.2rem; padding: 1rem;">
+            <i class="fas fa-check-circle"></i> Place Order (COD)
+        </button>
+
+        {% else %}
+        <div style="text-align: center; color: var(--text-muted); padding: 4rem;">
+            <i class="fas fa-shopping-basket" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>Your bag is empty.</p>
+            <a href="/home" style="color: var(--primary-gold); margin-top: 1rem; display: block;">Continue Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="paymentModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;">
+        <div
+            style="background: var(--card-bg); padding: 2rem; border-radius: 16px; max-width: 400px; text-align: center;">
+            <div id="paymentStatus">
+                <i class="fas fa-spinner fa-spin"
+                    style="font-size: 3rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                <h3>Placing your order...</h3>
+                <p style="color: var(--text-muted); margin-top: 1rem;">Please wait while we confirm your request.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', function () {
+                    // Validate address
+                    const houseNumber = document.getElementById('house_number').value.trim();
+                    const address = document.getElementById('address').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const state = document.getElementById('state').value.trim();
+                    const pincode = document.getElementById('pincode').value.trim();
+
+                    if (!houseNumber || !address || !city || !state || !pincode) {
+                        alert('Please fill in all shipping address fields');
+                        return;
+                    }
+
+                    // Show modal
+                    document.getElementById('paymentModal').style.display = 'flex';
+
+                    // Prepare checkout data
+                    const checkoutData = {
+                        shipping_address: {
+                            house_number: houseNumber,
+                            street: address,
+                            city: city,
+                            state: state,
+                            pincode: pincode
+                        },
+                        payment_method: 'COD'
+                    };
+
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.innerHTML = "<i class=\"fas fa-spinner fa-spin\"></i> Placing Order...";
+
+                    fetch('/api/checkout', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(checkoutData)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            document.getElementById('paymentStatus').innerHTML = `
+                                <div style="padding: 10px;">
+                                    <i class="fas fa-check-circle" style="font-size: 3.5rem; color: #2ecc71; margin-bottom: 1.2rem;"></i>
+                                    <h3 style="color: white;">Order Placed!</h3>
+                                    <p style="color: #aaa; margin-top: 1rem; font-size: 0.9rem;">
+                                        Order ID: <span style="color: var(--primary-gold);">${data.order_id}</span><br>
+                                        Status: Success
+                                    </p>
+                                    <button onclick="window.location.href='/order/${data.order_id}'" 
+                                            style="margin-top: 2rem; padding: 12px 25px; background: var(--primary-gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;">
+                                        View Order Summary
+                                    </button>
+                                </div>
+                            `;
+                            setTimeout(() => { window.location.href = `/order/${data.order_id}`; }, 3000);
+                        } else {
+                            showError(data.message || 'Checkout failed');
+                        }
+                    })
+                    .catch(err => {
+                        showError("Network Error: " + err.message);
+                    })
+                    .finally(() => {
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.innerHTML = "<i class=\"fas fa-check-circle\"></i> Place Order (COD)";
+                    });
+                });
+            }
+
+            function showError(message) {
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div style="padding: 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 1.5rem;"></i>
+                        <h3 style="color: white;">Error</h3>
+                        <p style="color: #aaa; margin-top: 1rem;">${message}</p>
+                        <button onclick="document.getElementById('paymentModal').style.display='none'" 
+                                style="margin-top: 2rem; padding: 12px 25px; background: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer; width: 100%;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+
+</html>

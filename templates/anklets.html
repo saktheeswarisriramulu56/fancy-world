@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anklets | Fancy World</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero"
+        style="height: 30vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/static/images/fancy_anklets.png');">
+        <div class="hero-content">
+            <h1>Fancy Anklets</h1>
+        </div>
+    </header>
+
+    <section class="categories" style="padding: 1rem;">
+        <div class="products-grid">
+            {% for p in products %}
+            <div class="product-card-mobile" onclick="window.location.href='/customize/{{ p._id }}'"
+                style="cursor: pointer;">
+                <div class="product-card-mobile__image-wrapper">
+                    <img src="{{ p.image_url or '/static/images/default.png' }}" alt="{{ p.name }}"
+                        class="product-card-mobile__image">
+                </div>
+                <div class="product-card-mobile__info">
+                    <h3 class="product-card-mobile__name">{{ p.name }}</h3>
+                    <p class="product-card-mobile__category">{{ p.category }}</p>
+                    <div class="product-card-mobile__footer">
+                        <span class="product-card-mobile__price">₹{{ "%.2f"|format(p.price) }}</span>
+                        <button class="product-card-mobile__add-btn"
+                            style="background: var(--primary-gold); color: black;">Customize</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not products %}
+            <div style="text-align: center; grid-column: 1/-1; padding: 2rem; color: #888;">
+                <p>Coming soon...</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

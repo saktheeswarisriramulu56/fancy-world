@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} | Fancy World</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="mobile-app-body">
+    <header class="app-header">
+        <div class="app-header__content">
+            <a href="/home" class="app-header__icon"><i class="fas fa-arrow-left"></i></a>
+            <div class="app-header__logo"><span class="logo-text">Our Collection</span></div>
+            <a href="/cart" class="app-header__icon">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+            </a>
+        </div>
+    </header>
+
+    <!-- NEW: Dynamic Category Filter Sidebar (AJAX) -->
+    <div class="category-menu" style="position: sticky; top: 56px; z-index: 100;">
+        <div class="category-menu__scroll">
+            <a href="javascript:void(0)" class="category-item" onclick="filterCategory('all')">
+                <i class="fas fa-th-large"></i> <span>All</span>
+            </a>
+            <a href="javascript:void(0)" class="category-item" onclick="filterCategory('necklaces')">
+                <i class="fas fa-gem"></i> <span>Necklaces</span>
+            </a>
+            <a href="javascript:void(0)" class="category-item" onclick="filterCategory('earrings')">
+                <i class="fas fa-magic"></i> <span>Earrings</span>
+            </a>
+            <a href="javascript:void(0)" class="category-item" onclick="filterCategory('bangles')">
+                <i class="fas fa-circle-notch"></i> <span>Bangles</span>
+            </a>
+        </div>
+    </div>
+
+    <div style="padding: 1rem;">
+        <!-- VIVA: products-container allows JS to update this specific div without full page refresh (AJAX) -->
+        <div class="products-grid" id="products-container">
+            {% for p in products %}
+            <div class="product-card-mobile" onclick="window.location.href='/customize/{{ p._id }}'">
+                <div class="product-card-mobile__image-wrapper">
+                    <!-- VIVA: data-src is used for lazy loading performance optimization -->
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" 
+                         data-src="{{ p.image_url }}" alt="{{ p.name }}"
+                         class="product-card-mobile__image lazy">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-card-mobile__name">{{ p.name }}</h3>
+                    <p class="product-card-mobile__category">{{ p.category }}</p>
+                    <div class="product-card-mobile__footer">
+                        <span class="product-card-mobile__price">₹{{ "%.2f"|format(p.price) }}</span>
+                        <button class="product-card-mobile__add-btn"
+                                onclick="addToCart(event, '{{ p.name }}', {{ p.price }}, '{{ p.image_url }}')">
+                            Add to Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Necklaces & Sets | Fancy World</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .category-section {
+            padding: 2rem 5%;
+        }
+
+        .section-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .circle-grid {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .circle-item {
+            text-align: center;
+            min-width: 130px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .circle-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .circle-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-gold);
+            margin-bottom: 0.8rem;
+        }
+
+        .circle-label {
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: 500;
+            display: block;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .price-tag {
+            color: var(--primary-gold);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .mini-add-btn {
+            width: 100%;
+            padding: 6px;
+            background: var(--primary-gold);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .set-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/home#categories">Collections</a></li>
+            <li><a href="/about.html">About</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero"
+        style="height: 35vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/static/images/fancy_choker.png');">
+        <div class="hero-content">
+            <h1>Necklaces & Sets</h1>
+            <p>Bridal Chokers & Elegant Chains</p>
+        </div>
+    </header>
+
+    <section class="category-section">
+        <h2 class="section-header">Our Collection</h2>
+        <div class="products-grid">
+            {% for p in products %}
+            <div class="product-card-mobile" onclick="window.location.href='/customize/{{ p._id }}'"
+                style="cursor: pointer;">
+                <div class="product-card-mobile__image-wrapper">
+                    <img src="{{ p.image_url or '/static/images/default.png' }}" alt="{{ p.name }}"
+                        class="product-card-mobile__image">
+                </div>
+                <div class="product-card-mobile__info">
+                    <h3 class="product-card-mobile__name">{{ p.name }}</h3>
+                    <p class="product-card-mobile__category">{{ p.category }}</p>
+                    <div class="product-card-mobile__footer">
+                        <span class="product-card-mobile__price">₹{{ "%.2f"|format(p.price) }}</span>
+                        <button class="product-card-mobile__add-btn"
+                            style="background: var(--primary-gold); color: black;">Customize</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not products %}
+            <div style="text-align: center; grid-column: 1/-1; padding: 3rem; color: #888;">
+                <p>Elegance is being prepared. Check back soon!</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

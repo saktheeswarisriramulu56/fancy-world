@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Fancy World</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(var(--primary-gold-rgb), 0.2);
+            border: 1px solid var(--primary-gold);
+        }
+
+        .payment-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .payment-status-success {
+            background: rgba(76, 175, 80, 0.2) !important;
+            border: 1px solid #4caf50 !important;
+            color: #4caf50 !important;
+        }
+
+        .payment-status-pending {
+            background: rgba(255, 152, 0, 0.2) !important;
+            border: 1px solid #ff9800 !important;
+            color: #ff9800 !important;
+        }
+
+        .order-card-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/home#categories">Collections</a></li>
+            <li><a href="/customization">Custom Design</a></li>
+            <li><a href="/profile" style="color: var(--primary-gold);">My Profile</a></li>
+        </ul>
+        <div class="icon-links">
+            <a href="/cart" class="icon-btn">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--primary-gold); color: black; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">
+                    {{ cart_count }}
+                </span>
+                {% endif %}
+            </a>
+            <a href="/logout" class="icon-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-sidebar">
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <h2 style="margin-bottom: 0.5rem;">{{ user.username if user else 'User' }}</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Member since {{ user.created_at.strftime('%b %Y')
+                if user and user.created_at else '2026' }}</p>
+
+            <button class="cta-btn" style="width: 100%; margin-bottom: 1rem;" onclick="editProfile()">Edit
+                Profile</button>
+            <a href="/logout" class="cta-btn"
+                style="width: 100%; background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); text-decoration: none; display: block; text-align: center;">Logout</a>
+        </div>
+
+        <div class="profile-content">
+            <h2 style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                Personal Information</h2>
+
+            <div class="info-group">
+                <span class="info-label">Username</span>
+                <div class="info-value">{{ user.username if user else 'N/A' }}</div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">Email Address</span>
+                <div class="info-value">{{ user.email if user else 'N/A' }}</div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">Phone Number</span>
+                <div class="info-value">{{ user.phone if user and user.phone else 'Not provided' }}</div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">Address</span>
+                <div class="info-value">
+                    {% if user and user.address %}
+                    {{ user.address.get('street', '') }}, {{ user.address.get('city', '') }}, {{
+                    user.address.get('state', '') }}
+                    {% else %}
+                    Not provided
+                    {% endif %}
+                </div>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                <h2 style="margin: 0;">Order History</h2>
+                <button onclick="refreshOrders()" id="refreshBtn"
+                    style="background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                    <i class="fas fa-sync-alt"></i> Refresh History
+                </button>
+            </div>
+
+            <div id="ordersContainer">
+                {% if orders %}
+                {% for order in orders %}
+                <div class="order-card"
+                    style="background: rgba(255,255,255,0.05); padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s ease;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                        <div>
+                            <h4 style="color: var(--primary-gold); margin-bottom: 0.3rem; font-size: 1.1rem;">#{{
+                                order.order_id }}</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                <i class="far fa-calendar-alt"></i> {{ order.created_at.strftime('%b %d, %Y - %I:%M %p')
+                                if order.created_at else 'N/A' }}
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span
+                                style="display: block; font-weight: 700; font-size: 1.2rem; color: var(--primary-gold); margin-bottom: 0.5rem;">₹{{
+                                "%.2f"|format(order.total_amount) }}</span>
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <span class="status-badge status-{{ order.status|lower }}">
+                                    {{ order.status }}
+                                </span>
+                                <span
+                                    class="payment-badge {{ 'payment-status-success' if order.payment_status == 'Success' else 'payment-status-pending' }}">
+                                    {{ order.payment_status }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.8rem;">Items ({{
+                            order['items']|length }})</p>
+                        <div class="order-card-items">
+                            {% for item in order['items'] %}
+                            <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <span style="font-size: 0.9rem; font-weight: 500;">{{ item.name }}</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">x{{ item.quantity
+                                        }}</span>
+                                </div>
+                                <div style="margin-top: 4px; color: var(--primary-gold); font-size: 0.85rem;">₹{{
+                                    "%.2f"|format(item.price) }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">
+                            <i class="fas fa-credit-card"></i> {{ order.payment_method }}
+                        </div>
+                        <div>
+                            <button onclick="trackOrder('{{ order.order_id }}')"
+                                style="background: var(--primary-gold); border: none; color: black; padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                <i class="fas fa-truck"></i> Track Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div
+                    style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-shopping-bag"
+                        style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.2; color: var(--primary-gold);"></i>
+                    <h3 style="margin-bottom: 0.5rem;">No orders found</h3>
+                    <p style="color: var(--text-muted);">It looks like you haven't placed any orders recently.</p>
+                    <a href="/home" class="cta-btn"
+                        style="display: inline-block; margin-top: 1.5rem; text-decoration: none;">Start Shopping</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Tracking Modal -->
+    <div id="trackingModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; padding: 2rem; overflow-y: auto;">
+        <div
+            style="max-width: 600px; margin: 2rem auto; background: var(--card-bg); border-radius: 16px; padding: 2rem; position: relative;">
+            <button onclick="closeTrackingModal()"
+                style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <h2 style="margin-bottom: 1.5rem; color: var(--primary-gold);">Order Tracking</h2>
+            <div id="trackingContent"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Fancy World. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function refreshOrders() {
+            const btn = document.getElementById('refreshBtn');
+            const container = document.getElementById('ordersContainer');
+            if (!btn || !container) return;
+            const originalHtml = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+
+            fetch('/api/orders')
+                .then(res => res.json())
+                .then(orders => {
+                    if (orders.error) throw new Error(orders.error);
+
+                    if (orders.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+                                <i class="fas fa-shopping-bag" style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.2; color: var(--primary-gold);"></i>
+                                <h3 style="margin-bottom: 0.5rem;">No orders found</h3>
+                                <p style="color: var(--text-muted);">It looks like you haven't placed any orders recently.</p>
+                                <a href="/home" class="cta-btn" style="display: inline-block; margin-top: 1.5rem; text-decoration: none;">Start Shopping</a>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    orders.forEach(order => {
+                        const date = new Date(order.created_at);
+                        const dateStr = date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                            ' - ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                        const statusClass = order.payment_status === 'Success' ? 'payment-status-success' : 'payment-status-pending';
+
+                        html += `
+                            <div class="order-card" style="background: rgba(255,255,255,0.05); padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s ease;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                                    <div>
+                                        <h4 style="color: var(--primary-gold); margin-bottom: 0.3rem; font-size: 1.1rem;">#${order.order_id}</h4>
+                                        <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                            <i class="far fa-calendar-alt"></i> ${dateStr}
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="display: block; font-weight: 700; font-size: 1.2rem; color: var(--primary-gold); margin-bottom: 0.5rem;">₹${order.total_amount.toFixed(2)}</span>
+                                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                            <span class="status-badge status-${order.status.toLowerCase()}">
+                                                ${order.status}
+                                            </span>
+                                            <span class="payment-badge ${statusClass}">
+                                                ${order.payment_status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                        <i class="fas fa-shopping-basket"></i> ${order.item_count} Item(s) | <i class="fas fa-credit-card"></i> ${order.payment_method}
+                                    </div>
+                                    <div>
+                                        <button onclick="trackOrder('${order.order_id}')" style="background: var(--primary-gold); border: none; color: black; padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                            <i class="fas fa-truck"></i> Track Order
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Refresh failed:', err);
+                    alert('Failed to refresh orders. Please try again.');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+        }
+
+        function trackOrder(orderId) {
+            fetch(`/api/order/${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const modal = document.getElementById('trackingModal');
+                    const content = document.getElementById('trackingContent');
+
+                    const statuses = ['Placed', 'Processing', 'Shipped', 'Delivered'];
+                    const currentStatus = data.order.status;
+                    const currentIndex = statuses.indexOf(currentStatus);
+
+                    let html = `
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">Order ${data.order.order_id}</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Total: ₹${data.order.total_amount}</p>
+                        </div>
+                        <div style="position: relative; padding-left: 2rem;">
+                    `;
+
+                    statuses.forEach((status, index) => {
+                        const isCompleted = index <= currentIndex;
+                        const isCurrent = index === currentIndex;
+
+                        html += `
+                            <div style="position: relative; padding-bottom: 2rem;">
+                                <div style="position: absolute; left: -1.5rem; top: 0; width: 12px; height: 12px; border-radius: 50%; background: ${isCompleted ? 'var(--primary-gold)' : 'rgba(255,255,255,0.2)'}; border: 2px solid ${isCompleted ? 'var(--primary-gold)' : 'rgba(255,255,255,0.2)'};"></div>
+                                <div style="border-left: 2px solid ${isCompleted ? 'var(--primary-gold)' : 'rgba(255,255,255,0.1)'}; position: absolute; left: -1rem; top: 12px; bottom: 0; width: 2px;"></div>
+                                <h4 style="color: ${isCompleted ? 'var(--primary-gold)' : 'var(--text-muted)'}; margin-bottom: 0.3rem;">${status}</h4>
+                                ${isCurrent ? '<p style="color: var(--text-muted); font-size: 0.85rem;">Current Status</p>' : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+
+                    if (data.payment) {
+                        html += `
+                            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                                <h4 style="color: var(--text-main); margin-bottom: 0.5rem;">Payment Information</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">Transaction ID: ${data.payment.transaction_id}</p>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">Method: ${data.payment.payment_method}</p>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">Status: <span style="color: ${data.payment.payment_status === 'Success' ? '#4caf50' : '#FF9800'}">${data.payment.payment_status}</span></p>
+                            </div>
+                        `;
+                    }
+
+                    content.innerHTML = html;
+                    modal.style.display = 'block';
+                })
+                .catch(err => {
+                    alert('Error loading order details');
+                    console.error(err);
+                });
+        }
+
+        function closeTrackingModal() {
+            document.getElementById('trackingModal').style.display = 'none';
+        }
+
+        function editProfile() {
+            alert('Profile editing feature coming soon!');
+        }
+    </script>
+</body>
+
+</html>

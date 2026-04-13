@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy World | Exquisite Jewelry</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">Fancy World</div>
+        <ul class="nav-links">
+            <li><a href="/home" class="active">Home</a></li>
+            <li><a href="/category/all">Collections</a></li>
+            <li><a href="/customization">Custom Design</a></li>
+            <li><a href="/about">About</a></li>
+
+        </ul>
+        <div class="icon-links">
+            <a href="/profile" class="icon-btn"><i class="fas fa-user-circle"></i></a>
+            <a href="/search" class="icon-btn"><i class="fas fa-search"></i></a>
+            <a href="/cart" class="icon-btn" style="position: relative;">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--primary-gold); color: black; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">
+                    {{ cart_count }}
+                </span>
+                {% endif %}
+            </a>
+            <a href="/logout" class="icon-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero"
+        style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/static/images/luxury_jewelry_hero.png'); background-size: cover; background-position: center;">
+        <div class="hero-content">
+            <h1>Timeless Elegance</h1>
+            <p>Discover our curated collection of exquisite handcrafted jewelry designed for those who appreciate the
+                finer things in life.</p>
+            <a href="/category/all" class="cta-btn">Explore Collections</a>
+        </div>
+    </header>
+
+    <!-- Featured Products Section -->
+    <section class="products-section" style="padding: 4rem 5%;">
+        <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="section-title">Featured Pieces</h2>
+            <p class="section-subtitle">Our most coveted designs this season</p>
+        </div>
+
+        <div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            {% for p in trending_products %}
+            <div class="product-card" onclick="window.location.href='/customize/{{ p._id }}'">
+                <div class="product-img-wrapper" style="height: 300px; overflow: hidden; position: relative;">
+                    <!-- VIVA: Implementing lazy loading with data-src for faster perceived performance -->
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" 
+                         data-src="{{ p.image_url }}" alt="{{ p.name }}" class="lazy"
+                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s;">
+                </div>
+                <div class="product-info" style="padding: 1.5rem; text-align: center;">
+                    <h3>{{ p.name }}</h3>
+                    <p class="price">₹{{ "%.2f"|format(p.price) }}</p>
+                    <button class="cta-btn" onclick="addToCart(event, '{{ p.name }}', '{{ p.price }}', '{{ p.image_url }}')">
+                        Add to Bag
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Regional Specials Section -->
+    <section class="products-section" style="background: #0a0a0a; padding: 4rem 5%;">
+        <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="section-title">Regional Specials</h2>
+            <p class="section-subtitle">Unique treasures from master artisans across the region</p>
+        </div>
+
+        <div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            {% for p in regional_specials %}
+            <div class="product-card" onclick="window.location.href='/customize/{{ p._id }}'">
+                <div class="product-img-wrapper" style="height: 300px; overflow: hidden; position: relative;">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" 
+                         data-src="{{ p.image_url }}" alt="{{ p.name }}" class="lazy"
+                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s;">
+                </div>
+                <div class="product-info" style="padding: 1.5rem; text-align: center;">
+                    <h3>{{ p.name }}</h3>
+                    <p class="price">₹{{ "%.2f"|format(p.price) }}</p>
+                    <button class="cta-btn" onclick="addToCart(event, '{{ p.name }}', '{{ p.price }}', '{{ p.image_url }}')">
+                        Add to Bag
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+        style="padding: 4rem 5%; background: var(--dark-bg); border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+        <div class="logo" style="margin-bottom: 1.5rem;">Fancy World</div>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 2rem;">Crafting elegance and beauty into
+            every piece. Our commitment to quality ensures you receive only the finest jewelry.</p>
+        <div class="social-links" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
+            <a href="#" style="color: var(--text-muted); font-size: 1.5rem;"><i class="fab fa-instagram"></i></a>
+            <a href="#" style="color: var(--text-muted); font-size: 1.5rem;"><i class="fab fa-facebook"></i></a>
+            <a href="#" style="color: var(--text-muted); font-size: 1.5rem;"><i class="fab fa-pinterest"></i></a>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.8rem;">&copy; 2026 Fancy World Jewelry. All rights reserved.
+        </p>
+    </footer>
+
+    <style>
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-gold) !important;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
+        }
+
+        .product-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .active {
+            color: var(--primary-gold) !important;
+        }
+    </style>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

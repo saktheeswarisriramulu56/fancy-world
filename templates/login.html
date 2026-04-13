@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Fancy World</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="auth-body">
+    <div class="background-wrapper">
+        <img src="/static/images/bg_luxury.png" alt="Jewellery Background">
+    </div>
+
+    <div class="login-container" style="position: relative;">
+        <!-- Premium Floating Admin Button UI -->
+        <div class="admin-floating-wrapper" style="position: absolute; top: 15px; right: 15px; z-index: 100;">
+            <button type="button" onclick="toggleFloatingAdmin()" style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #e91e63, #c2185b); border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="Admin Login">
+                <i class="fas fa-shield-alt" style="font-size: 1.1rem;"></i>
+            </button>
+            <div id="floatingAdminPopup" style="display: none; position: absolute; top: 55px; right: 0; width: 260px; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(233, 30, 99, 0.3); border-radius: 12px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 101;">
+                <h3 style="color: white; margin-top: 0; font-size: 1.05rem; margin-bottom: 1.2rem; text-align: center; font-family: 'Playfair Display', serif;"><i class="fas fa-user-shield" style="color: #ff8fb6; margin-right: 8px;"></i>Admin Access</h3>
+                <form action="/login" method="POST">
+                    <input type="hidden" name="is_admin" value="true">
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="floating_admin_username" name="email" placeholder="Admin Username" required style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='#e91e63'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    </div>
+                    <div style="margin-bottom: 1.2rem;">
+                        <input type="password" id="floating_admin_password" name="password" placeholder="Password" required style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='#e91e63'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    </div>
+                    <button type="submit" style="width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #e91e63, #c2185b); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(233, 30, 99, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(233, 30, 99, 0.3)';">
+                        SIGN IN
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="auth-icon"><i class="fas fa-lock"></i></div>
+        <div class="brand-title">Fancy World</div>
+        <div class="subtitle">Experience the Elegance</div>
+
+        {% if error %}
+        <div class="error-message" style="background: rgba(233, 30, 99, 0.2); color: #ff8fb6; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; text-align: center;">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- 2FA OTP Modal removed - Login is now password-only -->
+        <form id="loginForm" method="POST" action="/login">
+            <div class="input-group">
+                <label for="email">Email Address or Username</label>
+                <input type="text" id="email" name="email" placeholder="e.g. admin or your@email.com" required autofocus>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="actions">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember"> Remember me
+                </label>
+                <a href="/forgot-password" class="forgot-pass">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="login-btn">SIGN IN</button>
+
+            <div class="signup-link">
+                Don't have an account? <a href="/register">Create Account</a>
+            </div>
+        </form>
+
+    </div>
+
+    <script>
+        function toggleFloatingAdmin() {
+            const popup = document.getElementById('floatingAdminPopup');
+            if (popup.style.display === 'none' || popup.style.display === '') {
+                popup.style.display = 'block';
+                setTimeout(() => {
+                    const adminInput = document.getElementById('floating_admin_username');
+                    if (adminInput) adminInput.focus();
+                }, 100);
+            } else {
+                popup.style.display = 'none';
+            }
+        }
+
+        // Standard Login Form Handling
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function() {
+                const btn = this.querySelector('.login-btn');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+                }
+            });
+        }
+
+        // Handle admin form submission loading state
+        const adminPopup = document.getElementById('floatingAdminPopup');
+        if (adminPopup) {
+            const adminFormElement = adminPopup.querySelector('form');
+            if (adminFormElement) {
+                adminFormElement.addEventListener('submit', function() {
+                    const btn = this.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

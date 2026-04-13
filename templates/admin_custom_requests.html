@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Custom Requests | Admin Dash</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --dark-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --sidebar-bg: #050505;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            padding: 2rem 1rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 3rem;
+        }
+
+        .request-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .request-table th,
+        .request-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .request-table th {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--primary-gold);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #616161;
+        }
+
+        .status-possible {
+            background: #2e7d32;
+        }
+
+        .status-not-possible {
+            background: #c62828;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid var(--primary-gold);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-gold {
+            background: var(--primary-gold);
+            color: black;
+        }
+
+        .btn-dark {
+            background: #333;
+            color: white;
+            margin-right: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            background: #000;
+            border: 1px solid #444;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            min-height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="color: var(--primary-gold); margin-bottom: 3rem;">Fancy Admin</h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="/admin/dashboard" style="color: #aaa; text-decoration: none;"><i class="fas fa-th-large"></i>
+                Dashboard</a>
+            <a href="/admin/custom-requests" style="color: var(--primary-gold); text-decoration: none;"><i
+                    class="fas fa-gem"></i> Custom Requests</a>
+            <a href="/logout" style="color: #666; text-decoration: none; margin-top: 2rem;"><i
+                    class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="font-family: 'Playfair Display', serif; margin-bottom: 2rem;">Jewellery Customization Requests</h1>
+
+        <table class="request-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Request Summary</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td><strong>{{ req.username }}</strong></td>
+                    <td>{{ req.description|truncate(50) }}</td>
+                    <td><span class="status-badge status-{{ req.status.lower().replace(' ', '-') }}">{{ req.status
+                            }}</span></td>
+                    <td>{{ req.created_at.strftime('%d %b, %H:%M') if req.created_at else 'N/A' }}</td>
+                    <td>
+                        <button class="btn btn-gold review-btn" data-id="{{ req._id|string }}"
+                            data-user="{{ req.username }}" data-desc="{{ req.description }}"
+                            data-img="{{ req.image_url or '' }}">
+                            Review & Reply
+                        </button>
+
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Reply Modal -->
+    <div id="replyModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle" style="color: var(--primary-gold); margin-top: 0;">Review Request</h2>
+            <div id="requestDetails"
+                style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p id="customerMsg" style="font-size: 0.95rem; line-height: 1.5;"></p>
+                <div id="requestImgContainer" style="margin-top: 1rem; display: none;">
+                    <img id="requestImg" src="" style="max-width: 100%; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Decision</label>
+                <select id="replyStatus"
+                    style="width: 100%; padding: 0.8rem; background: #000; color: white; border: 1px solid #444; border-radius: 8px;">
+                    <option value="Possible">Design Possible</option>
+                    <option value="Not Possible">Not Possible</option>
+                </select>
+            </div>
+
+            <label style="display: block; margin-top: 1.5rem;">Artisan's Message to Customer</label>
+            <textarea id="replyMessage" placeholder="Type your explanation or quote here..."></textarea>
+
+            <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                <button class="btn btn-dark" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-gold" id="submitReply">Send Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRequestId = null;
+
+        // Set up event listeners for review buttons
+        document.querySelectorAll('.review-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const user = this.getAttribute('data-user');
+                const desc = this.getAttribute('data-desc');
+                const img = this.getAttribute('data-img');
+                openReplyModal(id, user, desc, img);
+            });
+        });
+
+        function openReplyModal(id, user, desc, img) {
+            currentRequestId = id;
+            document.getElementById('modalTitle').innerText = "Reply to " + user;
+            document.getElementById('customerMsg').innerText = desc;
+
+            const imgEl = document.getElementById('requestImg');
+            const container = document.getElementById('requestImgContainer');
+            if (img && img !== '') {
+                imgEl.src = img;
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+
+            document.getElementById('replyModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('replyModal').style.display = 'none';
+        }
+
+
+        document.getElementById('submitReply').addEventListener('click', async function () {
+            const status = document.getElementById('replyStatus').value;
+            const message = document.getElementById('replyMessage').value;
+            const btn = this;
+
+            if (!message.trim()) {
+                alert("Please provide a message for the customer.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            try {
+                const response = await fetch('/api/admin/reply-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        request_id: currentRequestId,
+                        status: status,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Failed to send reply.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Send Reply";
+            }
+        });
+    </script>
+</body>
+
+</html>
