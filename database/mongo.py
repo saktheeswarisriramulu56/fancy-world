@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 MONGODB_URI = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI")
 
 db = None
@@ -35,11 +37,10 @@ try:
     admins_collection = db.admins
     custom_requests_collection = db.custom_requests
 
-    print(f"[SUCCESS] Connected to MongoDB: {DATABASE_NAME}")
-
+    logger.info(f"[SUCCESS] Connected to MongoDB: {DATABASE_NAME}")
 except Exception as e:
-    print(f"[WARNING] MongoDB connection failed: {e}")
-    print("[INFO] App will run in limited mode (no database features)")
+    logger.error(f"[WARNING] MongoDB connection failed: {e}")
+    logger.info("[INFO] App will run in limited mode (no database features)")
     db = None
     client = None
     users_collection = None
