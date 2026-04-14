@@ -26,6 +26,7 @@
             <a href="/logout" class="icon-btn"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </nav>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <div style="max-width: 900px; margin: 4rem auto; padding: 2rem;">
         <h1 class="brand-title" style="margin-bottom: 2rem;">Your Shopping Bag</h1>
@@ -84,20 +85,33 @@
             </div>
         </div>
 
-        <!-- Payment Method Selection -->
         <div style="background: var(--card-bg); padding: 1.5rem; margin-top: 1.5rem; border-radius: 8px;">
             <h2 style="margin-bottom: 1rem; font-family: 'Playfair Display', serif;">Select Payment Method</h2>
-            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-                <label
-                    style="display: flex; flex-direction: column; align-items: center; padding: 2rem; border: 2px solid var(--primary-gold); border-radius: 8px; cursor: pointer; background: rgba(212, 175, 55, 0.05);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- COD Option -->
+                <label class="payment-option" style="display: flex; flex-direction: column; align-items: center; padding: 1.5rem; border: 2px solid #333; border-radius: 8px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02);">
                     <input type="radio" name="payment_method" value="COD" checked style="display: none;">
-                    <i class="fas fa-money-bill-wave"
-                        style="font-size: 3rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
-                    <span style="font-size: 1.3rem; font-weight: bold; color: white; letter-spacing: 1px;">Cash on Delivery (COD)</span>
-                    <span style="font-size: 0.9rem; color: #aaa; margin-top: 0.8rem;">Pay when you receive your order</span>
+                    <i class="fas fa-money-bill-wave" style="font-size: 2rem; color: #888; margin-bottom: 0.8rem;"></i>
+                    <span style="font-size: 1.1rem; font-weight: bold; color: white;">Cash on Delivery</span>
+                </label>
+                <!-- Online Payment Option -->
+                <label class="payment-option" style="display: flex; flex-direction: column; align-items: center; padding: 1.5rem; border: 2px solid #333; border-radius: 8px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02);">
+                    <input type="radio" name="payment_method" value="ONLINE" style="display: none;">
+                    <i class="fas fa-credit-card" style="font-size: 2rem; color: #888; margin-bottom: 0.8rem;"></i>
+                    <span style="font-size: 1.1rem; font-weight: bold; color: white;">Online Payment</span>
                 </label>
             </div>
         </div>
+
+        <style>
+            .payment-option:has(input:checked) {
+                border-color: var(--primary-gold) !important;
+                background: rgba(212, 175, 55, 0.05) !important;
+            }
+            .payment-option:has(input:checked) i {
+                color: var(--primary-gold) !important;
+            }
+        </style>
 
         <div
             style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
@@ -151,61 +165,124 @@
                         return;
                     }
 
-                    // Show modal
                     document.getElementById('paymentModal').style.display = 'flex';
-
-                    // Prepare checkout data
                     const checkoutData = {
-                        shipping_address: {
-                            house_number: houseNumber,
-                            street: address,
-                            city: city,
-                            state: state,
-                            pincode: pincode
-                        },
-                        payment_method: 'COD'
+                        shipping_address: { house_number: houseNumber, street: address, city: city, state: state, pincode: pincode },
+                        payment_method: document.querySelector('input[name="payment_method"]:checked').value
                     };
 
                     checkoutBtn.disabled = true;
-                    checkoutBtn.innerHTML = "<i class=\"fas fa-spinner fa-spin\"></i> Placing Order...";
+                    checkoutBtn.innerHTML = "<i class=\"fas fa-spinner fa-spin\"></i> Processing...";
 
+                    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+                    if (paymentMethod === 'ONLINE') {
+                        handleOnlinePayment(totalAmount, checkoutData);
+                    } else {
+                        handleCODPayment(checkoutData);
+                    }
+                });
+
+                function handleCODPayment(checkoutData) {
                     fetch('/api/checkout', {
                         method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(checkoutData)
                     })
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'success') {
-                            document.getElementById('paymentStatus').innerHTML = `
-                                <div style="padding: 10px;">
-                                    <i class="fas fa-check-circle" style="font-size: 3.5rem; color: #2ecc71; margin-bottom: 1.2rem;"></i>
-                                    <h3 style="color: white;">Order Placed!</h3>
-                                    <p style="color: #aaa; margin-top: 1rem; font-size: 0.9rem;">
-                                        Order ID: <span style="color: var(--primary-gold);">${data.order_id}</span><br>
-                                        Status: Success
-                                    </p>
-                                    <button onclick="window.location.href='/order/${data.order_id}'" 
-                                            style="margin-top: 2rem; padding: 12px 25px; background: var(--primary-gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;">
-                                        View Order Summary
-                                    </button>
-                                </div>
-                            `;
-                            setTimeout(() => { window.location.href = `/order/${data.order_id}`; }, 3000);
+                            showSuccess(data.order_id);
                         } else {
                             showError(data.message || 'Checkout failed');
                         }
                     })
-                    .catch(err => {
-                        showError("Network Error: " + err.message);
+                    .catch(err => showError("Network Error: " + err.message))
+                    .finally(() => resetBtn());
+                }
+
+                function handleOnlinePayment(amount, checkoutData) {
+                    fetch('/api/create-razorpay-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: amount })
                     })
-                    .finally(() => {
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerHTML = "<i class=\"fas fa-check-circle\"></i> Place Order (COD)";
-                    });
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const options = {
+                                "key": data.key_id,
+                                "amount": data.order.amount,
+                                "currency": "INR",
+                                "name": "Fancy World",
+                                "description": "Jewelry Purchase",
+                                "order_id": data.order.id,
+                                "handler": function (response) {
+                                    verifyPayment(response, checkoutData);
+                                },
+                                "prefill": {
+                                    "name": "{{ session.get('username', '') }}",
+                                    "email": "{{ session.get('user_email', '') }}"
+                                },
+                                "theme": { "color": "#D4AF37" }
+                            };
+                            const rzp = new Razorpay(options);
+                            rzp.open();
+                            document.getElementById('paymentModal').style.display = 'none';
+                        } else {
+                            showError(data.message);
+                        }
+                    })
+                    .catch(e => showError(e.message))
+                    .finally(() => resetBtn());
+                }
+
+                function verifyPayment(razorpayResponse, checkoutData) {
+                    document.getElementById('paymentModal').style.display = 'flex';
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <i class="fas fa-shield-alt fa-spin" style="font-size: 3rem; color: var(--primary-gold); margin-bottom: 1rem;"></i>
+                        <h3>Verifying Payment...</h3>
+                    `;
+
+                    fetch('/api/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...razorpayResponse,
+                            shipping_address: checkoutData.shipping_address
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showSuccess(data.order_id);
+                        } else {
+                            showError("Payment verification failed. Please contact support.");
+                        }
+                    })
+                    .catch(e => showError(e.message));
+                }
+
+                function showSuccess(orderId) {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div style="padding: 10px;">
+                            <i class="fas fa-check-circle" style="font-size: 3.5rem; color: #2ecc71; margin-bottom: 1.2rem;"></i>
+                            <h3 style="color: white;">Success!</h3>
+                            <p style="color: #aaa; margin-top: 1rem; font-size: 0.9rem;">
+                                Order ID: <span style="color: var(--primary-gold);">${orderId}</span>
+                            </p>
+                            <button onclick="window.location.href='/order/${orderId}'" 
+                                    style="margin-top: 2rem; padding: 12px 25px; background: var(--primary-gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;">
+                                View Order Summary
+                            </button>
+                        </div>
+                    `;
+                }
+
+                function resetBtn() {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = "<i class=\"fas fa-check-circle\"></i> Confirm Purchase";
+                }
             }
 
             function showError(message) {
