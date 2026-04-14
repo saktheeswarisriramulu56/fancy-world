@@ -4,10 +4,6 @@ Optimized for Render Free Tier (Ultra-low RAM, <1s Inference)
 No TensorFlow dependencies.
 """
 import os
-import torch
-import torch.nn as nn
-import torchvision.models as models
-import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -18,26 +14,31 @@ from bson import ObjectId
 MODEL_NAME = "MobileNetV3_Small"
 FEATURE_DIM = 576 # MobileNetV3 Small avgpool output size
 
-class FeatureExtractor(nn.Module):
-    def __init__(self):
-        super(FeatureExtractor, self).__init__()
-        # Load pretrained MobileNetV3 Small
-        mbv3 = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.IMAGENET1K_V1)
-        # Remove the final classifier head
-        self.feature_layer = mbv3.avgpool
-        self.backbone = mbv3.features
-        self.eval() 
-        
-        for param in self.parameters():
-            param.requires_grad = False
-
-    def forward(self, x):
-        x = self.backbone(x)
-        x = self.feature_layer(x)
-        return x
-
-# 🧠 Initialize Model Once at Startup (CPU mode)
 try:
+    import torch
+    import torch.nn as nn
+    import torchvision.models as models
+    import torchvision.transforms as transforms
+
+    class FeatureExtractor(nn.Module):
+        def __init__(self):
+            super(FeatureExtractor, self).__init__()
+            # Load pretrained MobileNetV3 Small
+            mbv3 = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.IMAGENET1K_V1)
+            # Remove the final classifier head
+            self.feature_layer = mbv3.avgpool
+            self.backbone = mbv3.features
+            self.eval() 
+            
+            for param in self.parameters():
+                param.requires_grad = False
+
+        def forward(self, x):
+            x = self.backbone(x)
+            x = self.feature_layer(x)
+            return x
+
+    # 🧠 Initialize Model Once at Startup (CPU mode)
     device = torch.device("cpu")
     model = FeatureExtractor().to(device)
     
@@ -50,6 +51,9 @@ try:
     
     HAS_ML = True
     print(f"[SUCCESS] AI Engine {MODEL_NAME} loaded. RAM usage optimized for Render.")
+except ImportError:
+    print("[ERROR] AI Engine unavailable (Torch not verified).")
+    HAS_ML = False
 except Exception as e:
     print(f"[ERROR] AI Engine failed to load: {e}")
     HAS_ML = False
