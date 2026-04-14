@@ -1,24 +1,49 @@
 from pymongo import MongoClient
 import os
 
-MONGO_URI = os.getenv("MONGO_URI")
+MONGODB_URI = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI")
+
+db = None
+client = None
+users_collection = None
+products_collection = None
+orders_collection = None
+admins_collection = None
+custom_requests_collection = None
 
 try:
-    if MONGO_URI:
-        client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
-        db = client.get_database("fancy_world")
-        print("✅ MongoDB Atlas Connected")
-    else:
-        raise Exception("No URI")
+    if not MONGODB_URI:
+        raise ValueError("MONGODB_URI environment variable is not set")
+
+    client = MongoClient(
+        MONGODB_URI,
+        serverSelectionTimeoutMS=5000,
+        connectTimeoutMS=10000,
+        socketTimeoutMS=10000,
+        tls=True,
+        tlsAllowInvalidCertificates=True
+    )
+    # Force connection test
+    client.admin.command('ping')
+    
+    DATABASE_NAME = os.getenv("DATABASE_NAME", "fancyworld")
+    db = client[DATABASE_NAME]
+
+    users_collection = db.users
+    products_collection = db.products
+    orders_collection = db.orders
+    admins_collection = db.admins
+    custom_requests_collection = db.custom_requests
+
+    print(f"[SUCCESS] Connected to MongoDB: {DATABASE_NAME}")
 
 except Exception as e:
-    print("⚠️ MongoDB disabled:", e)
-    client = None
+    print(f"[WARNING] MongoDB connection failed: {e}")
+    print("[INFO] App will run in limited mode (no database features)")
     db = None
-
-# Safe collections
-users_collection = db.users if db else None
-products_collection = db.products if db else None
-orders_collection = db.orders if db else None
-admins_collection = db.admins if db else None
-custom_requests_collection = db.custom_requests if db else None
+    client = None
+    users_collection = None
+    products_collection = None
+    orders_collection = None
+    admins_collection = None
+    custom_requests_collection = None
