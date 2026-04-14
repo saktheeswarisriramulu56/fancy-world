@@ -12,6 +12,7 @@ products_collection = None
 orders_collection = None
 admins_collection = None
 custom_requests_collection = None
+payments_collection = None
 
 try:
     if not MONGODB_URI:
@@ -36,6 +37,7 @@ try:
     orders_collection = db.orders
     admins_collection = db.admins
     custom_requests_collection = db.custom_requests
+    payments_collection = db.payments
 
     logger.info(f"[SUCCESS] Connected to MongoDB: {DATABASE_NAME}")
 except Exception as e:
@@ -48,3 +50,4 @@ except Exception as e:
     orders_collection = None
     admins_collection = None
     custom_requests_collection = None
+    payments_collection = None

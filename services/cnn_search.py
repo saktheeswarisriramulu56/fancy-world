@@ -6,7 +6,6 @@ No TensorFlow dependencies.
 import os
 from PIL import Image
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 from models.product_model import ProductModel
 from bson import ObjectId
 
@@ -15,6 +14,7 @@ MODEL_NAME = "MobileNetV3_Small"
 FEATURE_DIM = 576 # MobileNetV3 Small avgpool output size
 
 try:
+    from sklearn.metrics.pairwise import cosine_similarity
     import torch
     import torch.nn as nn
     import torchvision.models as models
