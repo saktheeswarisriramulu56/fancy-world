@@ -1,71 +1,79 @@
-# 🚀 Jewelry E-Commerce Backend (SAFE MODE - No Mongo, No ML)
+# 🚀 Fancy World - Stable Backend (Render Safe)
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
-from functools import wraps
-from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash
-
-# ❌ Mongo disabled
-db = None
-users_collection = None
-products_collection = None
-orders_collection = None
-admins_collection = None
-custom_requests_collection = None
-
-# ❌ ML disabled
-# from services.cnn_search import search_products_by_image
+from flask import Flask, request, jsonify, session, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = "test_key"
-
-app.config['UPLOAD_FOLDER'] = 'static/images/uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs('static/images', exist_ok=True)
-os.makedirs('static/uploads/custom', exist_ok=True)
+app.secret_key = "fancy_secret_key"
 
 # ---------- BASIC ROUTES ----------
 
 @app.route('/')
 def home():
-    return "App is running 🚀"
+    return "Working ✅ Fancy World Backend Running!"
 
-@app.route('/login')
+@app.route('/health')
+def health():
+    return {"status": "ok"}
+
+# ---------- AUTH (TEMP) ----------
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        data = request.json
+        session['user'] = data.get('email', 'guest')
+        return jsonify({"status": "success"})
     return "Login Page"
 
-@app.route('/register')
-def register():
-    return "Register Page"
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
 
-@app.route('/catalog')
-def catalog():
-    return "Catalog Page"
+# ---------- CART (TEMP) ----------
 
-# ---------- CART ----------
 @app.route('/api/cart/add', methods=['POST'])
 def add_cart():
     cart = session.get('cart', [])
     cart.append(request.json)
     session['cart'] = cart
-    return jsonify({'status': 'ok'})
+    return jsonify({"status": "success", "count": len(cart)})
 
-# ---------- IMAGE SEARCH (DISABLED) ----------
+@app.route('/api/cart')
+def get_cart():
+    return jsonify(session.get('cart', []))
+
+# ---------- PRODUCTS (TEMP STATIC DATA) ----------
+
+DUMMY_PRODUCTS = [
+    {"id": 1, "name": "Gold Ring", "price": 5000},
+    {"id": 2, "name": "Silver Chain", "price": 2000},
+    {"id": 3, "name": "Diamond Necklace", "price": 15000},
+]
+
+@app.route('/catalog')
+def catalog():
+    return jsonify(DUMMY_PRODUCTS)
+
+# ---------- IMAGE SEARCH (DISABLED SAFE) ----------
+
 @app.route('/api/image-search', methods=['POST'])
 def image_search():
     return jsonify({
         "status": "success",
-        "message": "Image search disabled",
-        "products": []
+        "message": "Image search disabled (free tier)",
+        "products": DUMMY_PRODUCTS[:2]
     })
 
-# ---------- ADMIN ----------
+# ---------- ADMIN (TEMP) ----------
+
 @app.route('/admin')
 def admin():
-    return "Admin Dashboard"
+    return "Admin Dashboard (Safe Mode)"
 
 # ---------- RUN ----------
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
